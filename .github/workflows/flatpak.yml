@@ -1,0 +1,32 @@
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+name: "Flatpak"
+jobs:
+  flatpak:
+    name: "Flatpak"
+    runs-on: ubuntu-latest
+    timeout-minutes: 600
+    container:
+      image: bilelmoussaoui/flatpak-github-actions:freedesktop-21.08
+      options: --privileged
+    strategy:
+      matrix:
+        arch: [x86_64]
+      fail-fast: false
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
+      name: "Build"
+      with:
+        bundle: org.chromium.Chromium.flatpak
+        manifest-path: org.chromium.Chromium.yaml
+        cache-key: flatpak-builder-${{ github.sha }}
+        arch: ${{ matrix.arch }}
